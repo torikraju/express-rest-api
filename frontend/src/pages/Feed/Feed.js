@@ -109,8 +109,6 @@ class Feed extends Component {
         if (this.state.editPost) {
             url = 'URL';
         }
-
-        console.log(url);
         axios.post(url, postData)
             .then(response => {
                 const post = {
@@ -139,12 +137,12 @@ class Feed extends Component {
                 });
             })
             .catch(err => {
-                console.log(err);
+                console.log(err.response.data);
                 this.setState({
                     isEditing: false,
                     editPost: null,
                     editLoading: false,
-                    error: err
+                    error: err.response.data
                 });
             });
     };
