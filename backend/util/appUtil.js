@@ -3,3 +3,8 @@ exports.throwError = (message, statusCode) => {
     error.statusCode = statusCode;
     throw error;
 };
+
+exports.sendError = (err, next, statusCode) => {
+    if (!err.statusCode) err.statusCode = statusCode;
+    next(err);
+}
