@@ -104,12 +104,17 @@ class Feed extends Component {
         this.setState({
             editLoading: true
         });
-        // Set up data (with image!)
+
+        const formData = new FormData();
+        formData.append('title', postData.title);
+        formData.append('content', postData.content);
+        formData.append('image', postData.image);
+
         let url = '/feed/post';
         if (this.state.editPost) {
             url = 'URL';
         }
-        axios.post(url, postData)
+        axios.post(url, formData, {headers: {'Content-Type': 'multipart/form-data'}})
             .then(response => {
                 const post = {
                     _id: response.data.post._id,

@@ -10,13 +10,16 @@ exports.getPosts = (req, res, next) => {
 };
 
 exports.createPost = (req, res, next) => {
+    const image = req.file;
+    if (!image) throwError('No image provided', 422);
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) throwError('Validation failed, entered data is incorrect.', 422);
     const {title, content} = req.body;
     const post = new Post({
         title,
         content,
-        imageUrl: 'images/book.jpeg',
+        imageUrl: image.path.replace(/\\/g, "/"),
         creator: {name: 'Torikul'}
     });
     post.save()
@@ -32,6 +35,7 @@ exports.getPost = (req, res, next) => {
     const {postId} = req.params;
     Post.findById(postId)
         .then(post => {
+            console.log(post);
             if (!post) throwError('Could not found post.', 404);
             res.status(200).json({message: 'post fetched', post});
         })
