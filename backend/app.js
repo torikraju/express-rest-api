@@ -1,9 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
+const {MONGODB_URI} = require('./util/string');
 const feedRoutes = require('./routes/feed');
 
 const app = express();
+const port = 8080;
 
 app.use(bodyParser.json());
 
@@ -16,4 +19,7 @@ app.use((req, res, next) => {
 
 app.use('/feed', feedRoutes);
 
-app.listen(8080);
+mongoose
+    .connect(MONGODB_URI, {useNewUrlParser: true, useFindAndModify: false})
+    .then(() => app.listen(port, () => console.log(`Example app listening on port ${port}!`)))
+    .catch(e => console.log(e));
