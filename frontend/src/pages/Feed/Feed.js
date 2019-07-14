@@ -52,7 +52,7 @@ class Feed extends Component {
             this.setState({postPage: page});
         }
 
-        axios.get(`/feed/posts?page=${page}`)
+        axios.get(`/feed/posts?page=${page}`, {headers: {Authorization: `Bearer ${this.props.token}`}})
             .then(response => {
                 if (response.status !== 200) {
                     throw new Error('Failed to fetch posts.');
@@ -68,7 +68,7 @@ class Feed extends Component {
                     postsLoading: false
                 });
             })
-            .catch(this.catchError);
+            .catch(err=>this.catchError(err.response.data));
     };
 
     statusUpdateHandler = event => {
