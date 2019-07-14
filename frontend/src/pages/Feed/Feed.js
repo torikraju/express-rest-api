@@ -52,7 +52,7 @@ class Feed extends Component {
             this.setState({postPage: page});
         }
 
-        axios.get('/feed/posts')
+        axios.get(`/feed/posts?page=${page}`)
             .then(response => {
                 if (response.status !== 200) {
                     throw new Error('Failed to fetch posts.');
