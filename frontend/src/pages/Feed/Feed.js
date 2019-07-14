@@ -120,7 +120,7 @@ class Feed extends Component {
             url = `/feed/post/${this.state.editPost._id}`;
             method = 'put'
         }
-        axios[method](url, formData, {headers: {'Content-Type': 'multipart/form-data'}})
+        axios[method](url, formData, {headers: {'Content-Type': 'multipart/form-data', Authorization: `Bearer ${this.props.token}`}})
             .then(response => {
                 const post = {
                     _id: response.data.post._id,
@@ -164,7 +164,7 @@ class Feed extends Component {
 
     deletePostHandler = postId => {
         this.setState({postsLoading: true});
-        axios.delete(`/feed/post/${postId}`)
+        axios.delete(`/feed/post/${postId}`, {headers: {Authorization: `Bearer ${this.props.token}`}})
             .then(res => {
                 if (res.status !== 200 && res.status !== 201) throw new Error('Deleting a post failed!');
                 this.setState(prevState => {
