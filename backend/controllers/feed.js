@@ -1,6 +1,9 @@
 const { validationResult } = require('express-validator');
+const mongoose = require('mongoose');
 
 const Post = require('../models/post');
+const User = require('../models/user');
+
 const { throwError, sendError, clearImage } = require('../util/appUtil');
 
 exports.getPosts = (req, res, next) => {
@@ -30,17 +33,27 @@ exports.createPost = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) throwError('Validation failed, entered data is incorrect.', 422);
   const { title, content } = req.body;
+  let creator;
   const post = new Post({
     title,
     content,
     imageUrl: image.path.replace(/\\/g, '/'),
-    creator: { name: 'Torikul' }
+    creator: req.userId
   });
   post.save()
-    .then(result => res.status(201).json({
-      message: 'Post created successfully!',
-      post: result
-    }))
+    .then(() => User.findById(req.userId))
+    .then(user => {
+      creator = user;
+      user.posts.push(post);
+      return user.save();
+    })
+    .then(() => {
+      res.status(201).json({
+        message: 'Post created successfully!',
+        post,
+        creator: { _id: creator._id, name: creator.name }
+      });
+    })
     .catch(err => sendError(err, next, 500));
 };
 
