@@ -1,7 +1,10 @@
+const fs = require('fs');
+const path = require('path');
+
 const {validationResult} = require('express-validator');
 
 const Post = require('../models/post');
-const {throwError, sendError} = require('../util/appUtil');
+const {throwError, sendError, clearImage} = require('../util/appUtil');
 
 exports.getPosts = (req, res, next) => {
     Post.find()
@@ -41,4 +44,27 @@ exports.getPost = (req, res, next) => {
         })
         .catch(err => sendError(err, next, 500))
 
+};
+
+exports.updatePost = (req, res, next) => {
+    const postId = req.params.postId;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) throwError('Validation failed, entered data is incorrect.', 422);
+    const title = req.body.title;
+    const content = req.body.content;
+    let imageUrl = req.body.image;
+    if (req.file) imageUrl = req.file.path;
+    if (!imageUrl) throwError('No image provided', 422);
+    Post.findById(postId)
+        .then(post => {
+            if (!post) throwError('Could not found post.', 404);
+            if (imageUrl !== post.imageUrl) clearImage(post.imageUrl);
+
+            post.title = title;
+            post.imageUrl = imageUrl;
+            post.content = content;
+            return post.save();
+        })
+        .then(result => res.status(200).json({message: 'Post updated!', post: result}))
+        .catch(err => sendError(err, next, 500));
 };

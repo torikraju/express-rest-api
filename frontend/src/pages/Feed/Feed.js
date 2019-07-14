@@ -58,7 +58,12 @@ class Feed extends Component {
                     throw new Error('Failed to fetch posts.');
                 }
                 this.setState({
-                    posts: response.data.posts,
+                    posts: response.data.posts.map(post => {
+                        return {
+                            ...post,
+                            imagePath: post.imageUrl
+                        };
+                    }),
                     totalPosts: response.data['totalItems'],
                     postsLoading: false
                 });
@@ -109,12 +114,13 @@ class Feed extends Component {
         formData.append('title', postData.title);
         formData.append('content', postData.content);
         formData.append('image', postData.image);
-
+        let method = 'post';
         let url = '/feed/post';
         if (this.state.editPost) {
-            url = 'URL';
+            url = `/feed/post/${this.state.editPost._id}`;
+            method = 'put'
         }
-        axios.post(url, formData, {headers: {'Content-Type': 'multipart/form-data'}})
+        axios[method](url, formData, {headers: {'Content-Type': 'multipart/form-data'}})
             .then(response => {
                 const post = {
                     _id: response.data.post._id,

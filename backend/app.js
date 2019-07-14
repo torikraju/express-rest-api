@@ -7,7 +7,7 @@ const multer = require('multer');
 
 const {MONGODB_URI} = require('./util/string');
 const feedRoutes = require('./routes/feed');
-const {getFileExtension, getUUID} = require('./util/AppUtil');
+const {getFileExtension, getUUID} = require('./util/appUtil');
 
 const app = express();
 const port = 8080;

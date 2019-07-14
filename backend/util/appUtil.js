@@ -1,4 +1,6 @@
 const uuid = require('uuid');
+const fs = require('fs');
+const path = require('path');
 
 exports.throwError = (message, statusCode) => {
     const error = new Error(message);
@@ -20,3 +22,8 @@ exports.getUUID = () => uuid.v1()
     .toString()
     .split('-')
     .join('');
+
+exports.clearImage = filePath => {
+    filePath = path.join(__dirname, '..', filePath);
+    fs.unlink(filePath, err => console.log(err));
+};
