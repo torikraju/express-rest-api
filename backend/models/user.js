@@ -17,10 +17,10 @@ const userSchema = new Schema({
     },
     status: {
         type: Object,
-        required: true
+        default: 'I am new!'
     },
     posts: [{
-        type: Schema.types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'Post'
     }]
 }, {timestamp: true});

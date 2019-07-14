@@ -1,5 +1,5 @@
 const express = require('express');
-const {body} = require('express-validator');
+const {body, check} = require('express-validator');
 
 const authController = require('../controllers/auth');
 const User = require('../models/user');
@@ -8,17 +8,19 @@ const router = express.Router();
 
 
 router.put('/signup',
-    body('email')
-        .isEmail
-        .withMessage('Please enter a void email')
-        .custom(value => User.findOne({email: value})
+    check('email')
+        .isEmail()
+        .withMessage('Please enter a valid email.')
+        .custom((value) => User.findOne({email: value})
             .then(user => {
-                if (user) return Promise.reject('E-Mail exists already, please pick a different one.');
+                if (user) {
+                    return Promise.reject('E-Mail exists already, please pick a different one.');
+                }
             }))
         .normalizeEmail(),
     body('password', 'Please enter a password with only numbers and text and at least 5 characters.')
-        .isLength({min: 5})
-        .isAlphanumeric()
+        // .isLength({min: 5})
+        // .isAlphanumeric()
         .not()
         .isEmpty()
         .trim(),

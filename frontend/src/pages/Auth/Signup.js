@@ -18,7 +18,7 @@ class Signup extends Component {
         value: '',
         valid: false,
         touched: false,
-        validators: [required, length({ min: 5 })]
+        validators: [required, length({ min: 1 })]
       },
       name: {
         value: '',
