@@ -22,3 +22,6 @@ yarn-error.log*
 .vscode
 .idea
 .history
+package-lock.json
+yarn.lock
+.env
