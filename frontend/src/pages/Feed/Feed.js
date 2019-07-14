@@ -164,19 +164,14 @@ class Feed extends Component {
 
     deletePostHandler = postId => {
         this.setState({postsLoading: true});
-        fetch('URL')
+        axios.delete(`/feed/post/${postId}`)
             .then(res => {
-                if (res.status !== 200 && res.status !== 201) {
-                    throw new Error('Deleting a post failed!');
-                }
-                return res.json();
-            })
-            .then(resData => {
-                console.log(resData);
+                if (res.status !== 200 && res.status !== 201) throw new Error('Deleting a post failed!');
                 this.setState(prevState => {
                     const updatedPosts = prevState.posts.filter(p => p._id !== postId);
                     return {posts: updatedPosts, postsLoading: false};
                 });
+
             })
             .catch(err => {
                 console.log(err);
