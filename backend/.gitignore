@@ -91,7 +91,6 @@ typings/
 .history
 .idea
 .vscode
-util/string.js
 package-lock.json
 yarn.lock
 
