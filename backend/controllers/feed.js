@@ -76,10 +76,10 @@ exports.updatePost = (req, res, next) => {
   let imageUrl = req.body.image;
   if (req.file) imageUrl = req.file.path;
   if (!imageUrl) throwError('No image provided', 422);
-  Post.findById(postId)
+  Post.findById(postId).populate('creator')
     .then(post => {
       if (!post) throwError('Could not found post.', 404);
-      if (post.creator.toString() !== req.userId) throwError('Not authorize', 403);
+      if (post.creator._id.toString() !== req.userId) throwError('Not authorize', 403);
       if (imageUrl !== post.imageUrl) clearImage(post.imageUrl);
 
       post.title = title;
@@ -87,7 +87,10 @@ exports.updatePost = (req, res, next) => {
       post.content = content;
       return post.save();
     })
-    .then(result => res.status(200).json({ message: 'Post updated!', post: result }))
+    .then(result => {
+      io.getIO().emit('posts', { actions: 'update', post: result });
+      res.status(200).json({ message: 'Post updated!', post: result });
+    })
     .catch(err => sendError(err, next, 500));
 };
 

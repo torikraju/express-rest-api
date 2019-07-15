@@ -37,6 +37,8 @@ class Feed extends Component {
             if (data.actions === 'create') {
                 console.log('i am here');
                 this.addPost(data.post);
+            }else if (data.actions === 'update') {
+                this.updatePost(data.post);
             }
         });
     }
@@ -51,6 +53,19 @@ class Feed extends Component {
             return {
                 posts: updatedPosts,
                 totalPosts: prevState.totalPosts + 1
+            };
+        });
+    };
+
+    updatePost = post => {
+        this.setState(prevState => {
+            const updatedPosts = [...prevState.posts];
+            const updatedPostIndex = updatedPosts.findIndex(p => p._id === post._id);
+            if (updatedPostIndex > -1) {
+                updatedPosts[updatedPostIndex] = post;
+            }
+            return {
+                posts: updatedPosts
             };
         });
     };
@@ -142,15 +157,7 @@ class Feed extends Component {
                     createdAt: response.data.post.createdAt
                 };
                 this.setState(prevState => {
-                    let updatedPosts = [...prevState.posts];
-                    if (prevState.editPost) {
-                        const postIndex = prevState.posts.findIndex(
-                            p => p._id === prevState.editPost._id
-                        );
-                        updatedPosts[postIndex] = post;
-                    }
                     return {
-                        posts: updatedPosts,
                         isEditing: false,
                         editPost: null,
                         editLoading: false
