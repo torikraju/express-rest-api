@@ -1,5 +1,4 @@
 const { validationResult } = require('express-validator');
-const mongoose = require('mongoose');
 
 const Post = require('../models/post');
 const User = require('../models/user');
@@ -79,6 +78,7 @@ exports.updatePost = (req, res, next) => {
   Post.findById(postId)
     .then(post => {
       if (!post) throwError('Could not found post.', 404);
+      if (post.creator.toString() !== req.userId) throwError('Not authorize', 403);
       if (imageUrl !== post.imageUrl) clearImage(post.imageUrl);
 
       post.title = title;
@@ -95,7 +95,7 @@ exports.deletePost = (req, res, next) => {
   Post.findById(postId)
     .then(post => {
       if (!post) throwError('Could not found post.', 404);
-      // check logged in user
+      if (post.creator.toString() !== req.userId) throwError('Not authorize', 403);
       clearImage(post.imageUrl);
       return post.remove();
     })
