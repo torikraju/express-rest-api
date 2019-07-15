@@ -35,7 +35,6 @@ class Feed extends Component {
         socket.on('posts', data => {
             console.log(data);
             if (data.actions === 'create') {
-                console.log('i am here');
                 this.addPost(data.post);
             }else if (data.actions === 'update') {
                 this.updatePost(data.post);
