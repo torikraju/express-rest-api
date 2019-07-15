@@ -38,6 +38,8 @@ class Feed extends Component {
                 this.addPost(data.post);
             }else if (data.actions === 'update') {
                 this.updatePost(data.post);
+            }else if (data.actions === 'delete') {
+                this.loadPosts();
             }
         });
     }
@@ -183,10 +185,11 @@ class Feed extends Component {
         axios.delete(`/feed/post/${postId}`, {headers: {Authorization: `Bearer ${this.props.token}`}})
             .then(res => {
                 if (res.status !== 200 && res.status !== 201) throw new Error('Deleting a post failed!');
-                this.setState(prevState => {
-                    const updatedPosts = prevState.posts.filter(p => p._id !== postId);
-                    return {posts: updatedPosts, postsLoading: false};
-                });
+                // this.setState(prevState => {
+                //     const updatedPosts = prevState.posts.filter(p => p._id !== postId);
+                //     return {posts: updatedPosts, postsLoading: false};
+                // });
+                this.loadPosts();
 
             })
             .catch(err => {
