@@ -41,8 +41,34 @@ exports.login = (req, res, next) => {
       res.status(200)
         .json({
           token,
-          userId: loadedUser._id.toString()
+          userId: loadedUser._id.toString(),
+          status: loadedUser.status
         });
     })
     .catch(err => sendError(err, next, 500));
+};
+
+exports.getUserStatus = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) throwError('User not found', 404);
+    res.status(200).json({ status: user.status });
+  }
+  catch (err) {
+    if (!err.statusCode) sendError(err, next, 500);
+  }
+};
+
+exports.updateUserStatus = async (req, res, next) => {
+  const newStatus = req.body.status;
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) throwError('User not found', 404);
+    user.status = newStatus;
+    await user.save();
+    res.status(200).json({ message: 'User updated.' });
+  }
+  catch (err) {
+    if (!err.statusCode) sendError(err, next, 500);
+  }
 };

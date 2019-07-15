@@ -1,4 +1,5 @@
 import React, {Component, Fragment} from 'react';
+import openSocket from 'socket.io-client';
 
 import Post from '../../components/Feed/Post/Post';
 import Button from '../../components/Button/Button';
@@ -23,20 +24,36 @@ class Feed extends Component {
     };
 
     componentDidMount() {
-        fetch('URL')
-            .then(res => {
-                if (res.status !== 200) {
-                    throw new Error('Failed to fetch user status.');
-                }
-                return res.json();
+        axios.get('/auth/status',{headers: {Authorization: `Bearer ${this.props.token}`}})
+            .then(res=>{
+                if (res.status !== 200) throw new Error('Failed to fetch user status.');
+                this.setState({status: res.data.status});
             })
-            .then(resData => {
-                this.setState({status: resData.status});
-            })
-            .catch(this.catchError);
-
+            .catch(err=>this.catchError(err.response));
         this.loadPosts();
+        const socket = openSocket('http://localhost:8080');
+        socket.on('posts', data => {
+            console.log(data);
+            if (data.actions === 'create') {
+                console.log('i am here');
+                this.addPost(data.post);
+            }
+        });
     }
+
+    addPost = post =>{
+        this.setState(prevState => {
+            const updatedPosts = [...prevState.posts];
+            if (prevState.postPage === 1) {
+                updatedPosts.pop();
+                updatedPosts.unshift(post);
+            }
+            return {
+                posts: updatedPosts,
+                totalPosts: prevState.totalPosts + 1
+            };
+        });
+    };
 
     loadPosts = direction => {
         if (direction) {
@@ -73,17 +90,12 @@ class Feed extends Component {
 
     statusUpdateHandler = event => {
         event.preventDefault();
-        fetch('URL')
-            .then(res => {
-                if (res.status !== 200 && res.status !== 201) {
-                    throw new Error("Can't update status!");
-                }
-                return res.json();
+        axios.patch('/auth/status',{status: this.state.status},{headers: {Authorization: `Bearer ${this.props.token}`}})
+            .then(res=>{
+                console.log(res);
+                if (res.status !== 200 && res.status !== 201) throw new Error("Can't update status!");
             })
-            .then(resData => {
-                console.log(resData);
-            })
-            .catch(this.catchError);
+            .catch(err=>this.catchError(err.response));
     };
 
     newPostHandler = () => {
@@ -136,8 +148,6 @@ class Feed extends Component {
                             p => p._id === prevState.editPost._id
                         );
                         updatedPosts[postIndex] = post;
-                    } else if (prevState.posts.length < 2) {
-                        updatedPosts = prevState.posts.concat(post);
                     }
                     return {
                         posts: updatedPosts,
