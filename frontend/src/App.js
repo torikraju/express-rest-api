@@ -113,7 +113,7 @@ class App extends Component {
                 this.setState({
                     isAuth: false,
                     authLoading: false,
-                    error: err.response
+                    error: err.response.data
                 });
             });
     };

@@ -5,25 +5,21 @@ const User = require('../models/user');
 
 const { throwError, sendError, clearImage } = require('../util/appUtil');
 
-exports.getPosts = (req, res, next) => {
+exports.getPosts = async (req, res, next) => {
   const currentPage = req.query['page'] || 1;
   const perPage = 2;
-  let totalItems;
-  Post.find()
-    .countDocuments()
-    .then(count => {
-      totalItems = count;
-      return Post.find().populate('creator').skip((currentPage - 1) * perPage).limit(perPage);
-    })
-    .then(posts => {
-      console.log(posts);
-      res.status(200).json({
-        message: 'Fetched posts successfully.',
-        posts,
-        totalItems
-      });
-    })
-    .catch(err => sendError(err, next, 500));
+  try {
+    const totalItems = await Post.find().countDocuments();
+    const posts = await Post.find().populate('creator').skip((currentPage - 1) * perPage).limit(perPage);
+    res.status(200).json({
+      message: 'Fetched posts successfully.',
+      posts,
+      totalItems
+    });
+  }
+  catch (err) {
+    sendError(err, next, 500);
+  }
 };
 
 exports.createPost = (req, res, next) => {
@@ -57,14 +53,16 @@ exports.createPost = (req, res, next) => {
     .catch(err => sendError(err, next, 500));
 };
 
-exports.getPost = (req, res, next) => {
+exports.getPost = async (req, res, next) => {
   const { postId } = req.params;
-  Post.findById(postId)
-    .then(post => {
-      if (!post) throwError('Could not found post.', 404);
-      res.status(200).json({ message: 'post fetched', post });
-    })
-    .catch(err => sendError(err, next, 500));
+  try {
+    const post = await Post.findById(postId);
+    if (!post) throwError('Could not found post.', 404);
+    res.status(200).json({ message: 'post fetched', post });
+  }
+  catch (err) {
+    sendError(err, next, 500);
+  }
 };
 
 exports.updatePost = (req, res, next) => {
@@ -90,20 +88,20 @@ exports.updatePost = (req, res, next) => {
     .catch(err => sendError(err, next, 500));
 };
 
-exports.deletePost = (req, res, next) => {
+exports.deletePost = async (req, res, next) => {
   const { postId } = req.params;
-  Post.findById(postId)
-    .then(post => {
-      if (!post) throwError('Could not found post.', 404);
-      if (post.creator.toString() !== req.userId) throwError('Not authorize', 403);
-      clearImage(post.imageUrl);
-      return post.remove();
-    })
-    .then(() => User.findById(req.userId))
-    .then(user => {
-      user.posts.pull(postId);
-      return user.save();
-    })
-    .then(() => res.status(200).json({ message: 'Deleted post' }))
-    .catch(err => sendError(err, next, 500));
+  try {
+    const post = await Post.findById(postId);
+    if (!post) throwError('Could not found post.', 404);
+    if (post.creator.toString() !== req.userId) throwError('Not authorize', 403);
+    clearImage(post.imageUrl);
+    await post.remove();
+    const user = await User.findById(req.userId);
+    user.posts.pull(postId);
+    await user.save();
+    res.status(200).json({ message: 'Deleted post' });
+  }
+  catch (err) {
+    sendError(err, next, 500);
+  }
 };
